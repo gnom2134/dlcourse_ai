@@ -18,6 +18,7 @@ def check_gradient(f, x, delta=1e-5, tol=1e-4):
     assert isinstance(x, np.ndarray)
     assert x.dtype == np.float
 
+    orig_x = x.copy()
     fx, analytic_grad = f(x)
     analytic_grad = analytic_grad.copy()
 
@@ -30,7 +31,13 @@ def check_gradient(f, x, delta=1e-5, tol=1e-4):
         numeric_grad_at_ix = 0
 
         # TODO Copy from previous assignment
-        raise Exception("Not implemented!")
+        x = orig_x.copy()
+        x[ix] += delta
+        first_point = f(x)[0]
+        x = orig_x.copy()
+        x[ix] -= delta
+        second_point = f(x)[0]
+        numeric_grad_at_ix = (first_point - second_point) / (2 * delta)
 
         if not np.isclose(numeric_grad_at_ix, analytic_grad_at_ix, tol):
             print("Gradients are different at %s. Analytic: %2.5f, Numeric: %2.5f" % (

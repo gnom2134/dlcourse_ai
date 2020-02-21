@@ -95,7 +95,6 @@ class KNN:
         num_train = self.train_X.shape[0]
         num_test = X.shape[0]
         # Using float32 to to save memory - the default is float64
-        dists = np.zeros((num_test, num_train), np.float32)
         dists = np.sum(np.abs(X.reshape(1, num_test, X.shape[1]) - self.train_X.reshape(num_train, 1, self.train_X.shape[1])), axis=2).T
          
         # TODO: Implement computing all distances with no loops!
@@ -118,7 +117,7 @@ class KNN:
         for i in range(num_test):
             # TODO: Implement choosing best class based on k
             # nearest training samples
-            closest_classes = self.train_y[np.argpartition(dists[i,:], self.k)][:self.k]
+            closest_classes = self.train_y[np.argpartition(dists[i,:], list(range(self.k + 1)))][:self.k]
             pred[i] = np.argmax(np.bincount(closest_classes))
         return pred
 
@@ -140,6 +139,6 @@ class KNN:
         for i in range(num_test):
             # TODO: Implement choosing best class based on k
             # nearest training samples
-            closest_classes = self.train_y[np.argpartition(dists[i,:], self.k)][:self.k]
+            closest_classes = self.train_y[np.argpartition(dists[i,:], list(range(self.k + 1)))][:self.k]
             pred[i] = np.argmax(np.bincount(closest_classes))
         return pred

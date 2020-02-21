@@ -14,7 +14,9 @@ def l2_regularization(W, reg_strength):
       gradient, np.array same shape as W - gradient of weight by l2 loss
     """
     # TODO: Copy from the previous assignment
-    raise Exception("Not implemented!")
+    loss = reg_strength * np.sum(W ** 2)
+    grad = 2 * reg_strength * W
+    
     return loss, grad
 
 
@@ -34,7 +36,19 @@ def softmax_with_cross_entropy(preds, target_index):
       dprediction, np array same shape as predictions - gradient of predictions by loss value
     """
     # TODO: Copy from the previous assignment
-    raise Exception("Not implemented!")
+    if len(preds.shape) == 1:
+        probs = np.array(preds).reshape(1, preds.shape[0])
+    probs = np.subtract(probs.T, np.max(probs, axis=1)).T
+    probs = np.exp(probs)
+    probs = np.divide(probs.T, np.sum(probs, axis=1)).T
+    
+    target_index = np.array(target_index)
+    add_arr = np.zeros(probs.shape)
+    add_arr[range(add_arr.shape[0]), target_index.flatten()] = 1
+    loss = np.sum(-1 * add_arr * np.log(probs))
+    
+    d_preds = probs
+    d_preds[range(d_preds.shape[0]), target_index.flatten()] -= 1
 
     return loss, d_preds
 
@@ -58,7 +72,10 @@ class ReLULayer:
         # TODO: Implement forward pass
         # Hint: you'll need to save some information about X
         # to use it later in the backward pass
-        raise Exception("Not implemented!")
+        self.grad = np.zeros(X.shape)
+        self.grad[X > 0] = 1
+        X[X < 0] = 0
+        return X
 
     def backward(self, d_out):
         """
@@ -74,7 +91,7 @@ class ReLULayer:
         """
         # TODO: Implement backward pass
         # Your final implementation shouldn't have any loops
-        raise Exception("Not implemented!")
+        d_result = np.multiply(self.grad, d_out)
         return d_result
 
     def params(self):
