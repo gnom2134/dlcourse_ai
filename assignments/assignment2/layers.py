@@ -36,13 +36,16 @@ def softmax_with_cross_entropy(preds, target_index):
       dprediction, np array same shape as predictions - gradient of predictions by loss value
     """
     # TODO: Copy from the previous assignment
+    target_index = np.array(target_index)
+    
     if len(preds.shape) == 1:
         probs = np.array(preds).reshape(1, preds.shape[0])
+    else:
+        probs = np.array(preds)
     probs = np.subtract(probs.T, np.max(probs, axis=1)).T
     probs = np.exp(probs)
     probs = np.divide(probs.T, np.sum(probs, axis=1)).T
     
-    target_index = np.array(target_index)
     add_arr = np.zeros(probs.shape)
     add_arr[range(add_arr.shape[0]), target_index.flatten()] = 1
     loss = np.sum(-1 * add_arr * np.log(probs))
@@ -50,7 +53,7 @@ def softmax_with_cross_entropy(preds, target_index):
     d_preds = probs
     d_preds[range(d_preds.shape[0]), target_index.flatten()] -= 1
 
-    return loss, d_preds
+    return loss, d_preds.reshape(preds.shape)
 
 
 class Param:
@@ -74,6 +77,7 @@ class ReLULayer:
         # to use it later in the backward pass
         self.grad = np.zeros(X.shape)
         self.grad[X > 0] = 1
+        self.grad[X == 0] = 0.5
         X[X < 0] = 0
         return X
 
@@ -91,7 +95,7 @@ class ReLULayer:
         """
         # TODO: Implement backward pass
         # Your final implementation shouldn't have any loops
-        d_result = np.multiply(self.grad, d_out)
+        d_result = self.grad * d_out
         return d_result
 
     def params(self):
@@ -108,7 +112,10 @@ class FullyConnectedLayer:
     def forward(self, X):
         # TODO: Implement forward pass
         # Your final implementation shouldn't have any loops
-        raise Exception("Not implemented!")
+        self.X = X.copy()
+        res = X @ self.W.value
+        res += self.B.value
+        return res
 
     def backward(self, d_out):
         """
@@ -132,8 +139,9 @@ class FullyConnectedLayer:
         # It should be pretty similar to linear classifier from
         # the previous assignment
 
-        raise Exception("Not implemented!")
-
+        self.W.grad = self.X.T @ d_out
+        self.B.grad = np.sum(d_out, axis=0).reshape(self.B.grad.shape[0], -1)
+        d_input = d_out @ self.W.value.T 
         return d_input
 
     def params(self):

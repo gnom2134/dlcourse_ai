@@ -1,5 +1,5 @@
-numpy
-matplotlib
-scipy
-torch
-torchvision
+numpy==1.16.2
+matplotlib==3.0.3
+scipy==1.2.1
+torch==1.4.0
+torchvision==0.5.0
