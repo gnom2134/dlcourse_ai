@@ -27,7 +27,11 @@ class ConvNet:
         conv2_channels, int - number of filters in the 2nd conv layer
         """
         # TODO Create necessary layers
-        raise Exception("Not implemented!")
+        self.model = [ConvolutionalLayer(input_shape[2], conv1_channels, 3, 1), ReLULayer(), MaxPoolingLayer(4, 4),\
+                      ConvolutionalLayer(conv1_channels, conv2_channels, 3, 1), ReLULayer(),\
+                      MaxPoolingLayer(4, 4), Flattener(), FullyConnectedLayer(np.prod(input_shape[:-1]) // 256 * conv2_channels,\
+                                                                              n_output_classes)] 
+        
 
     def compute_loss_and_gradients(self, X, y):
         """
@@ -40,21 +44,36 @@ class ConvNet:
         """
         # Before running forward and backward pass through the model,
         # clear parameter gradients aggregated from the previous pass
-
+        params = self.params()
+        for param in params:
+            params[param].grad = np.zeros_like(params[param].grad)
         # TODO Compute loss and fill param gradients
         # Don't worry about implementing L2 regularization, we will not
         # need it in this assignment
-        raise Exception("Not implemented!")
+        for layer in self.model:
+            X = layer.forward(X)
+        loss, grad = softmax_with_cross_entropy(X, y) 
+        for layer in self.model[::-1]:
+            grad = layer.backward(grad)
+        return loss
+        
 
     def predict(self, X):
         # You can probably copy the code from previous assignment
-        raise Exception("Not implemented!")
+        for layer in self.model:
+            X = layer.forward(X)
+        pred = np.argmax(X, axis=1)
+        
+        return pred
 
     def params(self):
         result = {}
 
         # TODO: Aggregate all the params from all the layers
         # which have parameters
-        raise Exception("Not implemented!")
+        for i,layer in enumerate(self.model):
+            l_pars = layer.params()
+            for j in l_pars:
+                result[str(i)+j] = l_pars[j]
 
         return result
